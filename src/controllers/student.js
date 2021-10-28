@@ -33,34 +33,15 @@ const uploadForm = async (form) => {
 
 class studentController {
 
-  //transcipt
-
-  // static qrcode(req, res) {
-  //   let data = {
-  //     name: "Employee Name",
-  //     age: 27,
-  //     department: "Police",
-  //     id: "aisuoiqu3234738jdhf100223"
-  //   };
-  //   let stringdata = JSON.stringify(data);
-  //   Qrcode.toDataURL(stringdata, function (err, url) {
-  //     if (err) return console.log("error occured");
-  //     console.log(url);
-  //     res.send({
-  //       status: 200,
-  //       url
-  //     });
-  //   });
-  // }
 
   static async sendFilestoFinance(req, res) {
     const { bankslip = {}, FormFile = {} } = req.files || {};
-
     const { phone, regno } = req.user;
+    const { service } = req.query;
 
     const slipFile = await uploadbankSlip(bankslip);
 
-    const { service } = req.query;
+
     let status = 'not viewed';
     let destination = 'finance';
 
@@ -68,10 +49,8 @@ class studentController {
     let time = date.toLocaleString();
 
     if (slipFile) {
-
       const formFile = await uploadForm(FormFile);
       if (formFile) {
-
         db.getConnection((err, connection) => {
           if (err) console.log("Error", err);
           else {
@@ -110,8 +89,6 @@ class studentController {
         message: "Error uploading file check the connection "
       });
     }
-
-
   }
 
 

@@ -56,7 +56,7 @@ class staffController {
   static financeSendToWaden(req, res) {
 
     const { full_names, occupation } = req.staff;
-    const { regno, service, phone } = req.query;
+    const { regno, service, phone, formslip } = req.query;
     const qrcode = `${full_names} from ${occupation}`;
     const status = 'not viewed';
     const destination = 'waden';
@@ -73,7 +73,8 @@ class staffController {
           qrcode,
           destination,
           status,
-          time
+          time,
+          formslip
         }, (err, result) => {
           if (err) console.log("Error", err);
           else {
@@ -142,7 +143,9 @@ class staffController {
   //waden send to librarian
 
   static wadenSendToLibrarian(req, res) {
-    const { regno, service, phone } = req.query;
+    const { regno, service, phone, formslip } = req.query;
+    const { full_names, occupation } = req.staff;
+    const qrcode = `${full_names} from ${occupation}`;
     const status = 'not viewed';
     const destination = 'library';
     let date = new Date();
@@ -157,7 +160,9 @@ class staffController {
           regno,
           destination,
           status,
-          time
+          time,
+          formslip,
+          qrcode
         }, (err, result) => {
           if (err) console.log("Error", err);
           else {
@@ -210,7 +215,7 @@ class staffController {
               else {
                 res.send({
                   status: 200,
-                  data: { librarydata: result }
+                  data: { libdata: result }
                 });
               }
               connection.release();
@@ -225,6 +230,8 @@ class staffController {
 
   static librarySendtoHOD(req, res) {
     const { regno, service, phone } = req.query;
+    const { full_names, occupation } = req.staff;
+    const qrcode = `${full_names} from ${occupation}`;
     const status = 'not viewed';
     const destination = 'HOD';
     let date = new Date();
@@ -239,7 +246,8 @@ class staffController {
           regno,
           destination,
           status,
-          time
+          time,
+          qrcode
         }, (err, result) => {
           if (err) console.log("Error", err);
           else {

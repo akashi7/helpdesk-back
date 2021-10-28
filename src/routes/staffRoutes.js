@@ -18,9 +18,14 @@ staffRouter.post("/wadenSendTolibrary", requiredLoggedIn.isStaffLoggedIn, staffC
 
 //library
 
-staffRouter.get('/wadenRequests', requiredLoggedIn.isStaffLoggedIn, staffController.librarianRequests);
-staffRouter.get("/wadenViewRequest", requiredLoggedIn.isStaffLoggedIn, staffController.libraryViewRequest);
-staffRouter.post("/wadenSendTolibrary", requiredLoggedIn.isStaffLoggedIn, staffController.librarySendtoHOD);
+staffRouter.get('/librayRequests', requiredLoggedIn.isStaffLoggedIn, staffController.librarianRequests);
+staffRouter.get("/libraryViewRequest", requiredLoggedIn.isStaffLoggedIn, staffController.libraryViewRequest);
+staffRouter.post("/librarySendToHod", requiredLoggedIn.isStaffLoggedIn, staffController.librarySendtoHOD);
+
+//hod
+
+staffRouter.get('/hodRequests', requiredLoggedIn.isStaffLoggedIn, staffController.HODRequests);
+staffRouter.get('/hodViewRequest', requiredLoggedIn.isStaffLoggedIn, staffController.HODviewRequest);
 
 
 

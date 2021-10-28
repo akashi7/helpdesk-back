@@ -14,7 +14,7 @@ class authController {
     db.getConnection((err, connection) => {
       if (err) console.log("err", err);
       else {
-        connection.query("SELECT * FROM  sch_students WHERE regno=?", [regno], (err, result) => {
+        connection.query("SELECT * FROM  students WHERE regno=?", [regno], (err, result) => {
           if (err) console.log("err", err);
           else if (result.length > 0) {
             res.send({
@@ -23,17 +23,12 @@ class authController {
             });
           }
           else {
-            connection.query("INSERT INTO sch_students SET?", { regno }, (err, resultS) => {
-              if (err) console.log("err", err);
-              else {
-                res.send({
-                  status: 200,
-                  message: "Student registered"
-                });
-              }
-              connection.release();
+            res.send({
+              status: 200,
+              regno
             });
           }
+          connection.release();
         });
       }
     });
@@ -65,29 +60,41 @@ class authController {
   }
 
   static StudentEnterInfo(req, res) {
-    const { phone, full_names, year } = req.body;
+    const { phone, full_names } = req.body;
     const { regno } = req.query;
+    const { password, confirmPassword } = req.body;
 
-    db.getConnection((err, connection) => {
-      if (err) console.log("err", err);
-      else {
-        connection.query("INSERT INTO students SET?", {
-          regno,
-          phone,
-          full_names,
-          year
-        }, (err, results) => {
-          if (err) console.log("err", err);
-          else {
-            res.send({
-              status: 200,
-              message: "Student information saved"
-            });
-          }
-          connection.release();
-        });
-      }
-    });
+    if (password !== confirmPassword) {
+      res.send({
+        status: 205,
+        message: "Passwords do not match"
+      });
+    }
+    else {
+      db.getConnection(async (err, connection) => {
+        if (err) console.log("err", err);
+        else {
+          const hashedPassword = await hash(password, 8);
+          connection.query("INSERT INTO students SET?", {
+            regno,
+            phone,
+            full_names,
+            password: hashedPassword
+          }, (err, results) => {
+            if (err) console.log("err", err);
+            else {
+              const token = sign({ phone, regno }, process.env.JWT_SECRET, { expiresIn: "5d" });
+              res.send({
+                status: 200,
+                message: "Student information saved",
+                token
+              });
+            }
+            connection.release();
+          });
+        }
+      });
+    }
   }
 
   static StudentCompleteRegistration(req, res) {

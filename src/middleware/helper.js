@@ -15,8 +15,8 @@ class appHepler {
   }
 
   static StudentInfoVal(req, res, next) {
-    const { phone, full_names, year } = req.body;
-    const { error } = appSchema.studentInfo.validate({ phone, full_names, year });
+    const { phone, full_names, password } = req.body;
+    const { error } = appSchema.studentInfo.validate({ phone, full_names, password });
     if (error) {
       res.send({
         status: 409,

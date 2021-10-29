@@ -1,5 +1,5 @@
 import { db } from "../config/database";
-import Qrcode from "qrcode";
+
 import cloudinary from "../config/cloudinary";
 
 
@@ -36,8 +36,8 @@ class studentController {
 
   static async sendFilestoFinance(req, res) {
     const { bankslip = {}, FormFile = {} } = req.files || {};
-    const { phone, regno } = req.user;
-    const { service } = req.query;
+    const { phone, regno, department } = req.user;
+    const { service, year } = req.query;
 
     const slipFile = await uploadbankSlip(bankslip);
 
@@ -62,7 +62,9 @@ class studentController {
               destination,
               bankslip: slipFile,
               formslip: formFile,
-              time
+              time,
+              department,
+              year
             }, (err, result) => {
               if (err) console.log("Error", err);
               else {
@@ -91,6 +93,43 @@ class studentController {
     }
   }
 
+  static studentViewAllresults(req, res) {
+    const { regno } = req.user;
+    db.getConnection((err, connection) => {
+      if (err) console.log("Error", err);
+      else {
+        connection.query("SELECT * FROM results WHERE regno=?", [regno], (err, result) => {
+          if (err) console.log("Error", err);
+          else {
+            res.send({
+              status: 200,
+              data: { files: result }
+            });
+          }
+          connection.release();
+        });
+      }
+    });
+  }
+
+  static viewFile(req, res) {
+    const { id } = req.query;
+    db.getConnection((err, connection) => {
+      if (err) console.log("Error", err);
+      else {
+        connection.query("SELECT * FROM results WHERE id=?", [id], (err, result) => {
+          if (err) console.log("Error", err);
+          else {
+            res.send({
+              status: 200,
+              data: { file: result }
+            });
+          }
+          connection.release();
+        });
+      }
+    });
+  }
 
 }
 

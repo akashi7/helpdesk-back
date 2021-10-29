@@ -1,4 +1,21 @@
 import { db } from "../config/database";
+import { nexmo } from "../config/nexmo";
+import cloudinary from "../config/cloudinary";
+
+
+const uploadFile = async (file) => {
+  try {
+    if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/png') {
+      const image = await cloudinary.uploader.upload(file.tempFilePath, (results) => results);
+      file = image.secure_url;
+      return file;
+    }
+
+  } catch (err) {
+    console.log('err', err);
+  }
+
+};
 
 class staffController {
 
@@ -56,7 +73,7 @@ class staffController {
   static financeSendToWaden(req, res) {
 
     const { full_names, occupation } = req.staff;
-    const { regno, service, phone, formslip } = req.query;
+    const { regno, service, phone, formslip, department, year } = req.query;
     const qrcode = `${full_names} from ${occupation}`;
     const status = 'not viewed';
     const destination = 'waden';
@@ -74,7 +91,8 @@ class staffController {
           destination,
           status,
           time,
-          formslip
+          formslip,
+          department, year
         }, (err, result) => {
           if (err) console.log("Error", err);
           else {
@@ -143,7 +161,7 @@ class staffController {
   //waden send to librarian
 
   static wadenSendToLibrarian(req, res) {
-    const { regno, service, phone, formslip } = req.query;
+    const { regno, service, phone, formslip, department, year } = req.query;
     const { full_names, occupation } = req.staff;
     const qrcode = `${full_names} from ${occupation}`;
     const status = 'not viewed';
@@ -162,7 +180,8 @@ class staffController {
           status,
           time,
           formslip,
-          qrcode
+          qrcode,
+          department, year
         }, (err, result) => {
           if (err) console.log("Error", err);
           else {
@@ -229,7 +248,7 @@ class staffController {
   //library send to HOD
 
   static librarySendtoHOD(req, res) {
-    const { regno, service, phone } = req.query;
+    const { regno, service, phone, department, formslip, year } = req.query;
     const { full_names, occupation } = req.staff;
     const qrcode = `${full_names} from ${occupation}`;
     const status = 'not viewed';
@@ -247,7 +266,9 @@ class staffController {
           destination,
           status,
           time,
-          qrcode
+          qrcode,
+          department,
+          formslip, year
         }, (err, result) => {
           if (err) console.log("Error", err);
           else {
@@ -266,10 +287,11 @@ class staffController {
 
   static HODRequests(req, res) {
     let destination = "HOD";
+    const { department } = req.staff;
     db.getConnection((err, connection) => {
       if (err) console.log("Error", err);
       else {
-        connection.query("SELECT * FROM services WHERE destination=?", [destination], (err, result) => {
+        connection.query("SELECT * FROM services WHERE destination=? AND department=?", [destination, department], (err, result) => {
           if (err) console.log("Error", err);
           else {
             res.send({
@@ -300,7 +322,7 @@ class staffController {
               else {
                 res.send({
                   status: 200,
-                  data: { librarydata: result }
+                  data: { hodData: result }
                 });
               }
               connection.release();
@@ -311,6 +333,148 @@ class staffController {
     });
   }
 
+  //HOD sent requested file
+
+  static async HODsendFile(req, res) {
+    const { regno, service, phone, year } = req.query;
+    const { file = {} } = req.files || {};
+
+    const Tel = `25${phone}`;
+
+    const File = await uploadFile(file);
+
+    if (File) {
+
+      db.getConnection((err, connection) => {
+        if (err) console.log("Error", err);
+        else {
+          connection.query("INSERT INTO results SET?", {
+            regno,
+            service,
+            file_url: File,
+            year
+          }, (err, result) => {
+            if (err) console.log("Error", err);
+            else {
+              const from = 'IPRC  help-desk';
+              const to = Tel;
+              const text = `Dear student with RegNo ${regno} go to dashboard and retrieve your ${service} file`;
+
+              nexmo.message.sendSms(from, to, text, (err, results) => {
+                if (err) {
+                  res.send({
+                    status: 307,
+                    message: "Sending message failed"
+                  });
+                }
+                else {
+                  res.send({
+                    status: 200
+                  });
+                }
+                connection.release();
+              });
+
+            }
+          });
+        }
+      });
+
+    }
+    else {
+      res.send({
+        status: 300,
+        message: "Error uploading file check the connection "
+      });
+    }
+
+
+
+  }
+
+  //staff reject requests
+
+  static financeRejectRequest(req, res) {
+    const { full_names, occupation } = req.staff;
+    const { regno, service, phone } = req.query;
+
+    const Tel = `25${phone}`;
+
+    const from = 'IPRC  help-desk';
+    const to = Tel;
+    const text = `Dear student with RegNo ${regno} your ${service} request was denied due to Wrong information provide` + `
+      please try again. From ${full_names} of ${occupation} DEP
+    `;
+
+    nexmo.message.sendSms(from, to, text, (err, results) => {
+      if (err) {
+        res.send({
+          status: 307,
+          message: "Sending message failed"
+        });
+      }
+      else {
+        res.send({
+          status: 200
+        });
+      }
+    });
+
+  }
+
+  static wadenRejectRequest(req, res) {
+    const { full_names, occupation } = req.staff;
+    const { regno, service, phone } = req.query;
+
+    const Tel = `25${phone}`;
+
+    const from = 'IPRC  help-desk';
+    const to = Tel;
+    const text = `Dear student with RegNo ${regno} your ${service} request was denied due to Hostel fee issues` + `
+    Please resolve issue and try again . From ${full_names} of ${occupation} DEP
+    `;
+
+    nexmo.message.sendSms(from, to, text, (err, results) => {
+      if (err) {
+        res.send({
+          status: 307,
+          message: "Sending message failed"
+        });
+      }
+      else {
+        res.send({
+          status: 200
+        });
+      }
+    });
+  }
+
+  static libraryRejectRequest(req, res) {
+    const { full_names, occupation } = req.staff;
+    const { regno, service, phone } = req.query;
+
+    const Tel = `25${phone}`;
+
+    const from = 'IPRC  help-desk';
+    const to = Tel;
+    const text = `Dear student with RegNo ${regno} your ${service} request was denied due to Book issues in library` + `
+    . From ${full_names} of ${occupation} DEP
+    `;
+
+    nexmo.message.sendSms(from, to, text, (err, results) => {
+      if (err) {
+        res.send({
+          status: 307,
+          message: "Sending message failed"
+        });
+      }
+      else {
+        res.send({
+          status: 200
+        });
+      }
+    });
+  }
 
 }
 

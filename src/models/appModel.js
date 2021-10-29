@@ -11,6 +11,7 @@ const appSchema = {
   studentInfo: Joi.object({
     phone: String.regex(/^[0-9]+$/).max(10).min(10).error(new Error("Tel must be 10 numbers")),
     full_names: String.max(20).regex(/^[A-Za-z]/).error(new Error("Names must be letters only")),
+    department: String.regex(/^[A-Za-z]/).error(new Error("Department is required and must be letters only")),
     password: String.min(6).regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.{6,})/).error(new Error('Password must be 6 characters long with a capital letter and a number'))
 
   }),

@@ -21,9 +21,10 @@ studentRouter.use(
 // transcipts
 
 studentRouter.post('/sendToFinance', requiredLoggedIn.isStudentLoggedIn, studentController.sendFilestoFinance);
+studentRouter.get("/yourFiles", requiredLoggedIn.isStudentLoggedIn, studentController.studentViewAllresults);
+studentRouter.get("/myfile", requiredLoggedIn.isStudentLoggedIn, studentController.viewFile);
 
 
-// studentRouter.get('/qr', studentController.qrcode);
 
 
 

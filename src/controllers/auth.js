@@ -60,7 +60,7 @@ class authController {
   }
 
   static StudentEnterInfo(req, res) {
-    const { phone, full_names } = req.body;
+    const { phone, full_names, department } = req.body;
     const { regno } = req.query;
     const { password, confirmPassword } = req.body;
 
@@ -79,11 +79,12 @@ class authController {
             regno,
             phone,
             full_names,
-            password: hashedPassword
+            password: hashedPassword,
+            department
           }, (err, results) => {
             if (err) console.log("err", err);
             else {
-              const token = sign({ phone, regno }, process.env.JWT_SECRET, { expiresIn: "5d" });
+              const token = sign({ phone, regno, department }, process.env.JWT_SECRET, { expiresIn: "5d" });
               res.send({
                 status: 200,
                 message: "Student information saved",
@@ -153,8 +154,8 @@ class authController {
               });
             }
             else {
-              const { phone, regno } = result[0];
-              const token = sign({ phone, regno }, process.env.JWT_SECRET, { expiresIn: "5d" });
+              const { phone, regno, department } = result[0];
+              const token = sign({ phone, regno, department }, process.env.JWT_SECRET, { expiresIn: "5d" });
               res.send({
                 status: 200,
                 message: "logged in ok",
@@ -173,7 +174,7 @@ class authController {
   //for staff
 
   static RegisterStaffMember(req, res) {
-    const { full_names, occupation, password, confirmPassword } = req.body;
+    const { full_names, occupation, password, confirmPassword, department } = req.body;
     if (password !== confirmPassword) {
       res.send({
         status: 205,
@@ -188,7 +189,8 @@ class authController {
           connection.query("INSERT INTO staff SET?", {
             full_names,
             occupation,
-            password: hashedPassword
+            password: hashedPassword,
+            department
           }, (err, result) => {
             if (err) console.log("err", err);
             else {
@@ -246,9 +248,9 @@ class authController {
                   token
                 });
               }
-              if (code === '103') {
-                const { code, occupation, full_names } = result[0];
-                const token = sign({ occupation, code, full_names }, process.env.JWT_SECRET, { expiresIn: "5d" });
+              if (result[0].occupation === 'HOD') {
+                const { code, occupation, full_names, department } = result[0];
+                const token = sign({ occupation, code, full_names, department }, process.env.JWT_SECRET, { expiresIn: "5d" });
                 res.send({
                   status: 203,
                   message: "HOD logged in ok",

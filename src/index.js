@@ -8,7 +8,7 @@ import staffRouter from "./routes/staffRoutes";
 
 
 const app = express();
-const PORT = process.env.PORT || 8000;
+const PORT = process.env.PORT || 9000;
 
 app.use(cors());
 app.use(morgan("dev"));

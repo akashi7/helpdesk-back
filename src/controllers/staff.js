@@ -73,7 +73,7 @@ class staffController {
   static financeSendToWaden(req, res) {
 
     const { full_names, occupation } = req.staff;
-    const { regno, service, phone, formslip, department, year } = req.query;
+    const { regno, service, phone, formslip, department, year, tel } = req.query;
     const qrcode = `${full_names} from ${occupation}`;
     const status = 'not viewed';
     const destination = 'waden';
@@ -96,12 +96,27 @@ class staffController {
         }, (err, result) => {
           if (err) console.log("Error", err);
           else {
-            res.send({
-              status: 200,
-              message: "sent ok"
+            const Tel = `25${tel}`;
+            const from = `${occupation}`;
+            const to = Tel;
+            const text = `Student with ${regno} requests ${service} sevice go check `;
+
+            nexmo.message.sendSms(from, to, text, (err, results) => {
+              if (err) {
+                res.send({
+                  status: 307,
+                  message: "Sending message failed"
+                });
+              }
+              else {
+                res.send({
+                  status: 200
+                });
+              }
+              connection.release();
             });
           }
-          connection.release();
+
         });
       }
     });
@@ -161,7 +176,7 @@ class staffController {
   //waden send to librarian
 
   static wadenSendToLibrarian(req, res) {
-    const { regno, service, phone, formslip, department, year } = req.query;
+    const { regno, service, phone, formslip, department, year, tel } = req.query;
     const { full_names, occupation } = req.staff;
     const qrcode = `${full_names} from ${occupation}`;
     const status = 'not viewed';
@@ -185,12 +200,27 @@ class staffController {
         }, (err, result) => {
           if (err) console.log("Error", err);
           else {
-            res.send({
-              status: 200,
-              message: "sent ok"
+            const Tel = `25${tel}`;
+            const from = `${occupation}`;
+            const to = Tel;
+            const text = `Student with ${regno} requests ${service} sevice go check `;
+
+            nexmo.message.sendSms(from, to, text, (err, results) => {
+              if (err) {
+                res.send({
+                  status: 307,
+                  message: "Sending message failed"
+                });
+              }
+              else {
+                res.send({
+                  status: 200
+                });
+              }
+              connection.release();
             });
           }
-          connection.release();
+
         });
       }
     });
@@ -248,7 +278,7 @@ class staffController {
   //library send to HOD
 
   static librarySendtoHOD(req, res) {
-    const { regno, service, phone, department, formslip, year } = req.query;
+    const { regno, service, phone, department, formslip, year, tel } = req.query;
     const { full_names, occupation } = req.staff;
     const qrcode = `${full_names} from ${occupation}`;
     const status = 'not viewed';
@@ -272,9 +302,24 @@ class staffController {
         }, (err, result) => {
           if (err) console.log("Error", err);
           else {
-            res.send({
-              status: 200,
-              message: "sent ok"
+            const Tel = `25${tel}`;
+            const from = `${occupation}`;
+            const to = Tel;
+            const text = `Student with ${regno} requests ${service} sevice go check `;
+
+            nexmo.message.sendSms(from, to, text, (err, results) => {
+              if (err) {
+                res.send({
+                  status: 307,
+                  message: "Sending message failed"
+                });
+              }
+              else {
+                res.send({
+                  status: 200
+                });
+              }
+              connection.release();
             });
           }
           connection.release();

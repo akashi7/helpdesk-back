@@ -1,6 +1,6 @@
 import { db } from "../config/database";
-
 import cloudinary from "../config/cloudinary";
+import { nexmo } from "../config/nexmo";
 
 
 
@@ -31,13 +31,15 @@ const uploadForm = async (form) => {
 
 };
 
+
+
 class studentController {
 
 
   static async sendFilestoFinance(req, res) {
     const { bankslip = {}, FormFile = {} } = req.files || {};
     const { phone, regno, department } = req.user;
-    const { service, year } = req.query;
+    const { service, year, tel } = req.query;
 
     const slipFile = await uploadbankSlip(bankslip);
 
@@ -68,9 +70,23 @@ class studentController {
             }, (err, result) => {
               if (err) console.log("Error", err);
               else {
-                res.send({
-                  status: 200,
-                  message: "Files sent"
+                const Tel = `25${tel}`;
+                const from = 'IPRC student';
+                const to = Tel;
+                const text = `Student with ${regno} requests ${service} sevice go check `;
+
+                nexmo.message.sendSms(from, to, text, (err, results) => {
+                  if (err) {
+                    res.send({
+                      status: 307,
+                      message: "Sending message failed"
+                    });
+                  }
+                  else {
+                    res.send({
+                      status: 200
+                    });
+                  }
                 });
               }
               connection.release();

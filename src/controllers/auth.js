@@ -230,7 +230,7 @@ class authController {
               });
             }
             else {
-              if (code === '101') {
+              if (result[0].occupation === 'waden') {
                 const { code, occupation, full_names } = result[0];
                 const token = sign({ occupation, code, full_names }, process.env.JWT_SECRET, { expiresIn: "5d" });
                 res.send({
@@ -239,7 +239,7 @@ class authController {
                   token
                 });
               }
-              if (code === '102') {
+              if (result[0].occupation === 'library') {
                 const { code, occupation, full_names } = result[0];
                 const token = sign({ occupation, code, full_names }, process.env.JWT_SECRET, { expiresIn: "5d" });
                 res.send({
@@ -257,7 +257,7 @@ class authController {
                   token
                 });
               }
-              if (code === '104') {
+              if (result[0].occupation === 'finance') {
                 const { code, occupation, full_names } = result[0];
                 const token = sign({ occupation, code, full_names }, process.env.JWT_SECRET, { expiresIn: "5d" });
                 res.send({

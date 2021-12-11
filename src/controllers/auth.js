@@ -71,28 +71,40 @@ class authController {
       });
     }
     else {
-      db.getConnection(async (err, connection) => {
+      db.getConnection((err, connection) => {
         if (err) console.log("err", err);
         else {
-          const hashedPassword = await hash(password, 8);
-          connection.query("INSERT INTO students SET?", {
-            regno,
-            phone,
-            full_names,
-            password: hashedPassword,
-            department
-          }, (err, results) => {
+          connection.query("SELECT * FROM students WHERE phone=?", [phone], async (err, result) => {
             if (err) console.log("err", err);
-            else {
-              const token = sign({ phone, regno, department }, process.env.JWT_SECRET, { expiresIn: "5d" });
+            else if (result.length > 0) {
               res.send({
-                status: 200,
-                message: "Student information saved",
-                token
+                status: 207,
+                message: "Phone number in use with other student"
               });
             }
-            connection.release();
+            else {
+              const hashedPassword = await hash(password, 8);
+              connection.query("INSERT INTO students SET?", {
+                regno,
+                phone,
+                full_names,
+                password: hashedPassword,
+                department
+              }, (err, results) => {
+                if (err) console.log("err", err);
+                else {
+                  const token = sign({ phone, regno, department }, process.env.JWT_SECRET, { expiresIn: "5d" });
+                  res.send({
+                    status: 200,
+                    message: "Student information saved",
+                    token
+                  });
+                }
+                connection.release();
+              });
+            }
           });
+
         }
       });
     }

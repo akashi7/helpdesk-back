@@ -32,6 +32,9 @@ const appSchema = {
   staffLogin: Joi.object({
     code: String.regex(/^[0-9]+$/).error(new Error("Code must be numbers")),
     password: String.min(6).regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.{6,})/).error(new Error('Password must be 6 characters long with a capital letter and a number'))
+  }),
+  resetPassword: Joi.object({
+    password: String.min(6).regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.{6,})/).error(new Error('Password must be 6 characters long with a capital letter and a number'))
   })
 };
 

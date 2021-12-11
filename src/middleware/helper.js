@@ -62,6 +62,18 @@ class appHepler {
     else next();
   }
 
+  static resetPassword(req, res, next) {
+    const { password } = req.body;
+    const { error } = appSchema.resetPassword.validate({ password });
+    if (error) {
+      res.send({
+        status: 409,
+        error: error.message
+      });
+    }
+    else next();
+  }
+
 }
 
 export default appHepler;

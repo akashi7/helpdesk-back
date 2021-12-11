@@ -1,6 +1,7 @@
 import { db } from "../config/database";
 import cloudinary from "../config/cloudinary";
 import { nexmo } from "../config/nexmo";
+import { hash } from "bcryptjs";
 
 
 
@@ -145,6 +146,61 @@ class studentController {
         });
       }
     });
+  }
+
+  static forgotPassword(req, res) {
+    const { regno, phone } = req.body;
+    db.getConnection((err, connection) => {
+      if (err) console.log("error", err);
+      else {
+        connection.query("SELECT * FROM students WHERE regno=? AND phone=?", [regno, phone], (err, result) => {
+          if (err) console.log("error", err);
+          else if (result.length === 0) {
+            res.send({
+              status: 300,
+              message: "Student do not exist"
+            });
+          }
+          else {
+            res.send({
+              status: 200,
+              regno
+            });
+          }
+          connection.release();
+        });
+      }
+    });
+  }
+
+  static resetPassword(req, res) {
+    const { regno } = req.query;
+    const { password, confirmPassword } = req.body;
+
+    if (password !== confirmPassword) {
+      res.send({
+        status: 300,
+        message: "Passwords do not match"
+      });
+    }
+    else {
+      db.getConnection(async (err, connection) => {
+        if (err) console.log("error", err);
+        else {
+          let hashedPassword = await hash(password, 8);
+          connection.query("UPDATE students SET password =? WHERE regno=?", [hashedPassword, regno], (err, result) => {
+            if (err) console.log("error", err);
+            else {
+              res.send({
+                status: 200,
+              });
+            }
+            connection.release();
+          });
+        }
+      });
+    }
+
   }
 
 }

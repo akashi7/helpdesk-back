@@ -503,8 +503,7 @@ class staffController {
     const from = 'IPRC  help-desk';
     const to = Tel;
     const text = `Dear student with RegNo ${regno} your ${service} request was denied due to Book issues in library` + `
-    . From ${full_names} of ${occupation} DEP
-    `;
+    . From ${full_names} of ${occupation} DEP`;
 
     nexmo.message.sendSms(from, to, text, (err, results) => {
       if (err) {

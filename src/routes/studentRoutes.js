@@ -2,6 +2,7 @@ import { Router } from "express";
 import fileUpload from "express-fileupload";
 import studentController from "../controllers/student";
 import requiredLoggedIn from "../middleware/requiredLogin";
+import appHepler from "../middleware/helper";
 
 const studentRouter = Router();
 
@@ -23,6 +24,8 @@ studentRouter.use(
 studentRouter.post('/sendToFinance', requiredLoggedIn.isStudentLoggedIn, studentController.sendFilestoFinance);
 studentRouter.get("/yourFiles", requiredLoggedIn.isStudentLoggedIn, studentController.studentViewAllresults);
 studentRouter.get("/myfile", requiredLoggedIn.isStudentLoggedIn, studentController.viewFile);
+studentRouter.post("/forgotPassword", studentController.forgotPassword);
+studentRouter.patch('/resetPassword', appHepler.resetPassword, studentController.resetPassword);
 
 
 
